@@ -1,0 +1,6 @@
+anki==2.1.35
+aqt==2.1.35
+PyQt5
+PyQtWebEngine
+packaging
+invoke

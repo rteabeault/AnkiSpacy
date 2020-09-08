@@ -1,0 +1,8 @@
+*.idea
+*.iml
+**/*/__pycache__
+src/user_files
+.DS_Store
+anki
+venv
+dist
