@@ -2,6 +2,7 @@ import os
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
+
 vendor_dir = os.path.join(current_dir, '_vendor')
 user_files = os.path.join(current_dir, 'user_files')
 packages_dir = os.path.join(user_files, 'packages')

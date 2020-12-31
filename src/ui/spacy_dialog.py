@@ -1,3 +1,4 @@
+import logging
 import os
 
 from PyQt5.QtCore import Qt, QItemSelectionModel, pyqtSignal
@@ -15,6 +16,7 @@ from PyQt5.QtWidgets import (
 from aqt import mw
 from packaging.version import parse
 
+from ..const import ADDON_NAME
 from .package_info import PackageInfo
 from .progress_indicator import QProgressIndicator
 from .spacy_colors import spacy_light, spacy_dark, spacy_medium
@@ -25,6 +27,7 @@ from ..fs_util import remove_path
 from ..installer import PipInstaller
 from ..spacy_paths import resources_dir
 
+logger = logging.getLogger(f'{ADDON_NAME}.{__name__}')
 
 class SpacyDialog(QDialog):
   package_installed = pyqtSignal(object)
