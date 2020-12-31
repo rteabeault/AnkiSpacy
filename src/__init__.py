@@ -1,4 +1,3 @@
-import distutils
 import logging
 import logging.config
 import logging.handlers
@@ -73,9 +72,13 @@ def init_menu():
 def init_vendor():
   logger.debug(f'Adding {vendor_dir} to sys.path')
   if vendor_dir not in sys.path:
-    sys.path.append(vendor_dir)
-    pkg_resources.working_set.add_entry(vendor_dir)
+    sys.path.insert(0, vendor_dir)
 
+  for entry in sys.path:
+    if entry not in pkg_resources.working_set.entries:
+      pkg_resources.working_set.add_entry(entry)
+
+  import distutils
   distutils.__path__.append(os.path.join(vendor_dir, "distutils"))
 
 

@@ -73,7 +73,7 @@ def generate_metadata(
         #     cwd=source_dir,
         #     command_desc='python setup.py egg_info',
         # )
-        print('call_subprocess', args, source_dir)
+        # print('call_subprocess', args, source_dir)
 
         prev_sys_argv = sys.argv.copy()
         prev_cwd = os.getcwd()
@@ -84,10 +84,6 @@ def generate_metadata(
             sys.argv = args[cpos+1:].copy()
             sys.argv[0] = '-c'
             os.chdir(source_dir)
-
-            print('set sys.argv to', sys.argv)
-            print('set cwd to', os.getcwd())
-            print('running eval on: %s' % theargs)
 
             globals()['__name__'] = '__main__'
             exec(theargs, globals(), globals())

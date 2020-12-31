@@ -1,3 +1,4 @@
+import logging
 import runpy
 import sys
 from contextlib import redirect_stdout, redirect_stderr
@@ -9,8 +10,10 @@ from pip._internal.cli.progress_bars import DownloadProgressMixin
 from pip._vendor.progress.bar import Bar
 from pkg_resources import Requirement
 
+from .const import ADDON_NAME
 from .spacy_packages import distribution
 
+logger = logging.getLogger(f'{ADDON_NAME}.{__name__}')
 
 class PipInstallerSignals(QObject):
   install_complete = pyqtSignal(object)
@@ -69,18 +72,24 @@ class PipInstaller:
 
       self.signals.install_complete.emit(self)
 
+    except SystemExit as e:
+      logger.debug(f"Install failed with exception {e}")
+      self.signals.install_failed.emit(e, self)
     except Exception as e:
+      logger.debug(f"Install failed with exception {e}")
       self.signals.install_failed.emit(e, self)
 
   def _run_pip_install(self, args):
     original_argv = sys.argv
     try:
       sys.argv = args
+      logger.debug(f"Running pip install with args {sys.argv}")
 
       with redirect_stdout(self.output), redirect_stderr(self.output):
         runpy.run_module("pip", run_name="__main__")
 
     except SystemExit as se:
+      logger.debug(f"Pip SystemExit: {se.code}")
       if se.code != 0:
         raise se
     finally:
