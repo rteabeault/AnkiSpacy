@@ -4,14 +4,14 @@ AnkiSpacy is a package manager for spaCy and its models. By itself it is not ver
 But its intent is to provide other Anki addons the power of spaCy without having to package and
 distribute spaCy.
 
-#### The Menu
+## The Menu
 Once installed the addon will create a `Manage Spacy...` menu item under Anki's `Tools` Menu.
 
 ![](./resources/ToolsMenu.jpg)
 
 By selecting this menu option you will be presented with the package manager dialog.
 
-#### The Package Manager
+## The Package Manager
 The package manager is a dialog that allows you to install spacy and its models. 
 
 ![](./resources/PackageManager.jpg)
@@ -32,7 +32,7 @@ Additionally, it provides further information about the package.
 
 At the bottom is a progress and info panel that outputs information as a package is installed.
 
-#### Hooks
+## Hooks
 
 Other Anki addons can subscribe to the hooks emitted by this addon. As each package is 
 installed/uninstalled the sys.path of python is updated so they will be made
@@ -87,6 +87,5 @@ To create a distribution zip
 inv dist
 ```
 
-### Special Thanks
+## Special Thanks
 Thanks to @ianki for helping me figure out how to run pip within Anki's python distribution.
-
