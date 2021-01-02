@@ -40,14 +40,9 @@ available/unavailable to other Anki addons.
 
 |Hook Name                 |Description|
 |--------------------------|-----------| 
-|AnkiSpacy.spacyInstalled  |Emitted when spaCy is installed via the package manager or during 
-|                          |Anki startup if spaCy is already installed.|
+|AnkiSpacy.spacyInstalled  |Emitted when spaCy is installed via the package manager or during Anki startup if spaCy is already installed.|
 |AnkiSpacy.spacyUninstalled|Emitted when spaCy is uninstalled via the package manager.|
-|AnkiSpacy.modelAvailable  |Emitted when a model is installed via the package manager or during
-|                          |Anki startup if the model is already installed. This hook will be
-|                          |emitted for all models that are compatible with the currently installed
-|                          |version of spaCy. If the model is not compatible or spaCy is not
-|                          |installed the hook will not emit for that model.|
+|AnkiSpacy.modelAvailable  |Emitted when a model is installed via the package manager or during Anki startup if the model is already installed. This hook will be emitted for all models that are compatible with the currently installed version of spaCy. If the model is not compatible or spaCy is not installed the hook will not emit for that model.|
 |AnkiSpacy.modelUnavailable|Emitted when a model is uninstalled via the package manager.|
 
 The hook is emitted with the following dict:
