@@ -8,7 +8,7 @@ from .spacy_packages import (
   installed_spacy_version,
   installed_model_packages,
   filter_compatible,
-  create_spacy_package
+  create_spacy_package, SpacyPackage, ModelPackage
 )
 
 logger = logging.getLogger(f'{ADDON_NAME}.{__name__}')
@@ -82,8 +82,12 @@ def _model_changed_hooks(spacy_info, model, model_version, hook_name):
 
 
 def _create_payload(package):
+  path = os.path.join(package.install_dir, package.name)
+  if type(package) == ModelPackage:
+    path = os.path.join(path, f"{package.name}-{package.installed}")
+
   return {
     'name': package.name,
     'version': package.installed,
-    'path': os.path.join(package.install_dir, package.name, f"{package.name}-{package.installed}")
+    'path': path
   }
