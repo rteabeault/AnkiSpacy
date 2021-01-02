@@ -1,5 +1,6 @@
 import logging
 import os
+from string import Template
 
 from PyQt5.QtCore import Qt, QItemSelectionModel, pyqtSignal
 from PyQt5.QtGui import QStandardItemModel
@@ -25,7 +26,9 @@ from .spacy_model import SpacyItemListModel
 from .stdout_progress import StdoutProgressText
 from ..fs_util import remove_path
 from ..installer import PipInstaller
-from ..spacy_paths import resources_dir
+from ..spacy_paths import resources_dir, header_md_file, checkmark_file, refresh_file, \
+  incompatible_file
+
 
 logger = logging.getLogger(f'{ADDON_NAME}.{__name__}')
 
@@ -33,8 +36,10 @@ class SpacyDialog(QDialog):
   package_installed = pyqtSignal(object)
   package_uninstalled = pyqtSignal(object, object)
 
+  # Make sure the background image can be found in windows.
+  background = os.path.join(resources_dir, "pattern_blue.jpg").replace("\\", "/")
   style = f"""
-      QDialog {{ background-image: url({resources_dir}/pattern_blue.jpg) }}
+      QDialog {{ background-image: url({background}) }}
       QPushButton {{
         background-color: {spacy_dark.name()};
         min-width: 80px;
@@ -54,6 +59,9 @@ class SpacyDialog(QDialog):
       }}
       QLabel {{
         color: {spacy_light.name()};
+      }}
+      QLabel#dialog_header{{
+        color: {spacy_dark.name()};
       }}
       QScrollBar:vertical {{
         border: none;
@@ -88,10 +96,18 @@ class SpacyDialog(QDialog):
 
     self.spacy_header = QLabel(self)
     self.spacy_header.setTextFormat(Qt.MarkdownText)
+    self.spacy_header.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+    self.spacy_header.setOpenExternalLinks(True)
     self.spacy_header.setWordWrap(True)
-    header_md = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-      'resources/SpacyHeader.md')
-    self.spacy_header.setText(open(header_md).read())
+    header_content = open(header_md_file).read().format(
+      checkmark_file=checkmark_file,
+      refresh_file=refresh_file,
+      incompatible_file=incompatible_file
+    )
+    # processed = Template(header_content).substitute({'checkmark_file': checkmark_file})
+    logger.debug(header_content)
+    self.spacy_header.setText(header_content)
+    self.spacy_header.setObjectName("dialog_header")
     self.layout.addWidget(self.spacy_header)
 
     self.management_splitter = QSplitter(self)

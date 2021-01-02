@@ -1,5 +1,5 @@
 from PyQt5.QtCore import pyqtSlot, Qt, pyqtSignal
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QFontDatabase
 from PyQt5.QtWidgets import (
   QWidget,
   QLabel,
@@ -59,7 +59,9 @@ class PackageInfo(QScrollArea):
     self.layout.setAlignment(Qt.AlignTop)
 
     self.name_widget = QLabel(self)
-    self.name_widget.setFont(QFont('Helvetica', 20))
+    font = QFontDatabase.systemFont(QFontDatabase.GeneralFont)
+    font.setPixelSize(20)
+    self.name_widget.setFont(font)
 
     self.layout.addWidget(self.name_widget)
 
@@ -146,12 +148,6 @@ class PackageDetail(QWidget):
   def __init__(self, parent=None):
     super(PackageDetail, self).__init__(parent=parent)
     self.layout = QGridLayout()
-    self.setStyleSheet(f"""
-      QLabel {{
-        qproperty-alignment: AlignTop;
-        font: 12pt 'Tahoma'
-      }}
-    """)
 
   def set_package(self, package):
     QWidget().setLayout(self.layout)
@@ -159,11 +155,19 @@ class PackageDetail(QWidget):
     self.layout.setSizeConstraint(QLayout.SetMinimumSize)
     self.setLayout(self.layout)
 
+    font = QFontDatabase.systemFont(QFontDatabase.GeneralFont)
+    font.setPixelSize(12)
+
     for i, (key, value) in enumerate(package.detail_dict().items()):
       key_label = QLabel('<b>' + key + ':</b>')
+      key_label.setAlignment(Qt.AlignTop)
+      key_label.setFont(font)
 
       value_label = QLabel(value)
+      value_label.setFont(font)
+
       value_label.setWordWrap(True)
       value_label.adjustSize()
+      value_label.setAlignment(Qt.AlignTop)
       self.layout.addWidget(key_label, i, 0)
       self.layout.addWidget(value_label, i, 1)

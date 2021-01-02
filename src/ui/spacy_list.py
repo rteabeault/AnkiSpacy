@@ -1,15 +1,14 @@
 import math
-import os
 from dataclasses import dataclass
 
 from PyQt5.QtCore import pyqtSignal, Qt, QSize, QPoint, QRect
-from PyQt5.QtGui import QFont, QFontMetrics, QPainter, QPen, QIcon, QTextLayout
+from PyQt5.QtGui import QFont, QFontMetrics, QPainter, QPen, QIcon, QTextLayout, QFontDatabase
 from PyQt5.QtWidgets import QAbstractItemView, QStyledItemDelegate, QStyle, QListView, QToolTip
 
+from ..spacy_paths import incompatible_file, refresh_file, checkmark_file
 from .spacy_colors import spacy_medium, spacy_light, spacy_dark_blue, spacy_light2, spacy_dark
 from .spacy_model import SpacyItemListModel
 from ..spacy_packages import ModelPackage
-from ..spacy_paths import resources_dir
 
 
 @dataclass
@@ -67,12 +66,9 @@ VERSION_SECTION_WIDTH = 50
 ICON_SECTION_WIDTH = 55
 PACKAGE_TITLE_FONT_SIZE = 14
 MODEL_ICON_CODE_BOX_CORNER_RADIUS = 10
-MODEL_ICON_FONT_SIZE = 28
+MODEL_ICON_FONT_SIZE = 24
 MODEL_ICON_CODE_PEN_WIDTH = 4
 MODEL_ICON_CODE_BOX_PEN_WIDTH = 4
-REFRESH_PATH = os.path.join(resources_dir, "refresh.png")
-INSTALLED_PATH = os.path.join(resources_dir, "checkmark.png")
-INCOMPATIBLE_PATH = os.path.join(resources_dir, "incompatible.png")
 VERSION_FONT_SIZE = 10
 DESCRIPTION_FONT_SIZE = 10
 
@@ -182,11 +178,11 @@ class SpacyListDelegate(QStyledItemDelegate):
   @staticmethod
   def _draw_model_icon_lang_code(painter, layout, package):
     painter.save()
-    font = painter.font()
-    font.setPointSize(MODEL_ICON_FONT_SIZE)
+    font = QFontDatabase.systemFont(QFontDatabase.GeneralFont)
+    font.setPixelSize(MODEL_ICON_FONT_SIZE)
     painter.setFont(font)
     painter.setPen(QPen(spacy_dark_blue, MODEL_ICON_CODE_PEN_WIDTH))
-    painter.drawText(layout.icon_layout.text_rect, Qt.AlignLeft & Qt.AlignTop, package.lang_code)
+    painter.drawText(layout.icon_layout.text_rect, Qt.AlignTop | Qt.AlignLeft, package.lang_code)
     painter.restore()
 
   def _draw_icon_overlays(self, painter, layout, package, index):
@@ -194,14 +190,14 @@ class SpacyListDelegate(QStyledItemDelegate):
 
     if package.installed:
       if self.is_model_incompatible(package, spacy_info):
-        icon_installed = QIcon(INCOMPATIBLE_PATH)
+        icon_installed = QIcon(incompatible_file)
         icon_installed.paint(painter, layout.icon_layout.installed_rect, Qt.AlignCenter)
       else:
-        icon_installed = QIcon(INSTALLED_PATH)
+        icon_installed = QIcon(checkmark_file)
         icon_installed.paint(painter, layout.icon_layout.installed_rect, Qt.AlignCenter)
 
     if package.updates_available():
-      icon_refresh = QIcon(REFRESH_PATH)
+      icon_refresh = QIcon(refresh_file)
       icon_refresh.paint(painter, layout.icon_layout.updates_rect, Qt.AlignCenter)
 
   def _draw_package_info_section(self, painter, layout, package):
@@ -209,9 +205,9 @@ class SpacyListDelegate(QStyledItemDelegate):
     title_rect = layout.info_layout.title_rect
     description_rect = layout.info_layout.description_rect
 
-    font = painter.font()
+    font = QFontDatabase.systemFont(QFontDatabase.GeneralFont)
     font.setStyle(QFont.StyleNormal)
-    font.setPointSize(PACKAGE_TITLE_FONT_SIZE)
+    font.setPixelSize(PACKAGE_TITLE_FONT_SIZE)
     painter.setFont(font)
     painter.setPen(QPen(spacy_light, 1))
 
@@ -220,7 +216,7 @@ class SpacyListDelegate(QStyledItemDelegate):
       Qt.AlignLeft & Qt.AlignTop,
       package.display_name())
 
-    font.setPointSize(DESCRIPTION_FONT_SIZE)
+    font.setPixelSize(DESCRIPTION_FONT_SIZE)
     painter.setFont(font)
 
     self._draw_elided_text(painter, description_rect, package.detail_dict()['Description'])
@@ -231,7 +227,7 @@ class SpacyListDelegate(QStyledItemDelegate):
     painter.save()
 
     font = painter.font()
-    font.setPointSize(VERSION_FONT_SIZE)
+    font.setPixelSize(VERSION_FONT_SIZE)
     painter.setPen(QPen(spacy_light, 1))
     painter.setFont(font)
 
@@ -282,13 +278,13 @@ class SpacyListDelegate(QStyledItemDelegate):
       QSize(VERSION_SECTION_WIDTH, rect.height()))
 
     return ItemLayout(
-      icon_layout=self._get_icon_layout(icon_rect, font),
+      icon_layout=self._get_icon_layout(icon_rect),
       info_layout=self._get_info_layout(info_rect, font),
       version_layout=self._get_version_layout(version_rect, font)
     )
 
   @staticmethod
-  def _get_icon_layout(rect, font):
+  def _get_icon_layout(rect):
     icon_rect_width = min(rect.width(), rect.height())
     overlay_rect_width = icon_rect_width * 0.30
 
@@ -298,14 +294,11 @@ class SpacyListDelegate(QStyledItemDelegate):
       icon_rect_width - (overlay_rect_width / 2.0) - 6,
       icon_rect_width - (overlay_rect_width / 2.0) - 6)
 
-    font.setPointSize(MODEL_ICON_FONT_SIZE)
-    metrics = QFontMetrics(font)
-    text_height = metrics.height()
     text_rect = QRect(
       icon_rect.x() + 6,
       icon_rect.y(),
-      icon_rect.width() - 6,
-      text_height)
+      icon_rect_width - (overlay_rect_width / 2.0) - 6,
+      icon_rect_width - (overlay_rect_width / 2.0) - 6)
 
     installed_rect = QRect(
       icon_rect.x() + icon_rect.width() - (overlay_rect_width / 2),
@@ -333,7 +326,7 @@ class SpacyListDelegate(QStyledItemDelegate):
   def _get_info_layout(rect, font):
     top_margin = 12
     margin = 3
-    font.setPointSize(PACKAGE_TITLE_FONT_SIZE)
+    font.setPixelSize(PACKAGE_TITLE_FONT_SIZE)
     metrics = QFontMetrics(font)
     title_rect_height = metrics.height()
     title_rect_width = rect.width() - margin - margin
@@ -363,7 +356,7 @@ class SpacyListDelegate(QStyledItemDelegate):
     margin = 3
     spacing = 10
 
-    font.setPointSize(VERSION_FONT_SIZE)
+    font.setPixelSize(VERSION_FONT_SIZE)
     font.setStyle(QFont.StyleNormal)
     metrics = QFontMetrics(font)
     version_height = metrics.height()
