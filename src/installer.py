@@ -1,7 +1,8 @@
 import logging
+import os
 import runpy
 import sys
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import redirect_stdout, redirect_stderr, contextmanager
 from io import TextIOBase
 
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -80,20 +81,17 @@ class PipInstaller:
       self.signals.install_failed.emit(e, self)
 
   def _run_pip_install(self, args):
-    original_argv = sys.argv
-    try:
+    with temp_sys_argv(), temp_environ():
+      os.environ['LC_ALL'] = "en_US.UTF-8"
       sys.argv = args
-      logger.debug(f"Running pip install with args {sys.argv}")
-
-      with redirect_stdout(self.output), redirect_stderr(self.output):
-        runpy.run_module("pip", run_name="__main__")
-
-    except SystemExit as se:
-      logger.debug(f"Pip SystemExit: {se.code}")
-      if se.code != 0:
-        raise se
-    finally:
-      sys.argv = original_argv
+      try:
+        logger.info(f"Running pip install with args {sys.argv}")
+        with redirect_stdout(self.output), redirect_stderr(self.output):
+          runpy.run_module("pip", run_name="__main__")
+      except SystemExit as se:
+        logger.debug(f"Pip SystemExit: {se.code}")
+        if se.code != 0:
+          raise se
 
   def target(self):
     if type(self.requirement) == str:
@@ -136,3 +134,20 @@ class QtFriendlyBar(DownloadProgressMixin, Bar):
 
 # Add our progress bar to pip
 progress_bars.BAR_TYPES.update(qt_friendly=(QtFriendlyBar, QtFriendlyBar))
+
+@contextmanager
+def temp_sys_argv():
+  original_argv = sys.argv.copy()
+  try:
+    yield
+  finally:
+    sys.argv = original_argv
+
+@contextmanager
+def temp_environ():
+  _environ = dict(os.environ)
+  try:
+    yield
+  finally:
+    os.environ.clear()
+    os.environ.update(_environ)
